@@ -1,154 +1,183 @@
-# How to Build a Project - Zero to Production
+# How to Build a Frontend Project - Zero to Production
 
-A hands-on, **language-agnostic** walkthrough for taking a brand-new project from an
-empty folder to a shipped, production-ready release using this workspace.
+A hands-on walkthrough for taking a **new frontend app** from an empty folder to a
+shipped, production-ready release using this workspace. The running example is a small
+**Task Board** (columns *To do / Doing / Done*, task cards, add-a-task) - enough UI to
+exercise semantics, accessibility, responsive layout, and data.
 
-**The pipeline is the constant; the stack is what you plug in.** The same flow -
-plan → scope → scaffold → (build → run → test → refine) → integrate → harden → ship -
-works whether you build in .NET, Node/TypeScript, Go, Python, or Rust. Everything
-stack-specific lives behind the setup table below and in
-[README - Adding a New Stack](../README.md#11-adding-a-new-stack).
+**The workspace is mockup-first.** You never write production UI from a fuzzy spec - you
+settle *what it should look like* with `build-prototype` before you build it. That single
+habit is what this guide is organized around.
 
-Running example throughout: **a small Task API** (create / list / complete tasks).
-Described at the behaviour level so you can follow it in any language.
+Configured for **Next.js / React / TypeScript**; the craft carries to any frontend stack
+(see [Extending to other stacks](../README.md#extending-to-other-stacks)).
 
 ---
 
 ## Principles that carry the whole build
 
-These are the durable habits. Internalize them; the phases below just apply them.
+Internalize these; the phases below just apply them.
 
-1. **Plan before you code.** Use Plan Mode (read-only, `Shift+Tab`) for architecture
-   talk so the agent reasons before it writes. → [`grill-me`](../.claude/skills/grill-me/SKILL.md)
-2. **Constraints beat volume.** State what must change, what must not, and - crucially -
-   **what NOT to build yet**. → Project Boundaries + [`safe-modification`](../.claude/rules/safe-modification.md)
-3. **Controlled first pass.** Narrow v1 aggressively (no DB/auth/cache/queues unless
-   the ticket needs them). Get to a running baseline, then grow.
-4. **Iterate, don't one-shot.** generate → run → **test** → refine. Early errors
-   (missing deps, env assumptions) are normal, not failure.
-5. **Wrap third-party behind an interface.** SDKs (AI providers, payment, storage)
-   never called directly from business logic. → [`design-principles`](../.claude/rules/design-principles.md)
-6. **Give the agent concrete environment facts** (versions, ports, hosts, model names)
-   instead of abstract requirements. → CLAUDE.md `Environment Facts`
-7. **Debug systematically:** reproduce → isolate a minimal case → one change at a time →
-   fix the root cause, not the symptom. → [`diagnose`](../.claude/skills/diagnose/SKILL.md)
-8. **You stay the pilot.** You own goals, architecture, taste, and persistence. The
-   agent accelerates; it does not decide.
+1. **Plan before you code.** Use Plan Mode (read-only, `Shift+Tab`) so the agent reasons
+   before it writes. → [`grill-me`](../.claude/skills/grill-me/SKILL.md)
+2. **See it before you build it.** For any non-trivial UI, settle the look with a mockup
+   first. → [`build-prototype`](../.claude/skills/build-prototype/SKILL.md)
+3. **Constraints beat volume.** State what must change, what must not, and **what NOT to
+   build yet**. → Project Boundaries + [`safe-modification`](../.claude/rules/safe-modification.md)
+4. **Craft is not optional.** A prototype skips tests and error-handling - never semantic
+   HTML and accessibility. → the `frontend-craft` skill (auto-loads on FE files)
+5. **Iterate, don't one-shot.** Scaffold → Style → Interact; generate → run → **test** →
+   refine. Early errors are normal.
+6. **Wrap the data layer.** Talk to APIs through a typed client / SWR hook, not `fetch`
+   scattered through components. → [`design-principles`](../.claude/rules/design-principles.md)
+7. **You stay the pilot.** You own product, architecture, and taste. The agent accelerates;
+   it does not decide - override on security / maintainability / disabled-checks.
 
 ---
 
-## Per-stack setup (multi-language)
+## Prerequisites
 
-`do-work` auto-detects the stack from a root indicator file. For a new stack not yet
-in the workspace, first follow [README §11](../README.md#11-adding-a-new-stack) to add
-its rules/context/patterns, then return here.
-
-| Indicator file | Stack | Build / typecheck | Test | Patterns skill |
-|----------------|-------|-------------------|------|----------------|
-| `*.csproj` / `*.sln` | .NET | `dotnet build` | `dotnet test` | `dotnet-patterns` |
-| `package.json` | Node / TS | `npm run build` / `tsc --noEmit` | `npm test` | `{stack}-patterns` |
-| `go.mod` | Go | `go build ./...` | `go test ./...` | add per §11 |
-| `pyproject.toml` | Python | - | `pytest` | add per §11 |
-| `Cargo.toml` | Rust | `cargo build` | `cargo test` | add per §11 |
-
-Where a phase below says "your build command" or "your test command", use this table.
+- **Node.js** (LTS) + a package manager (`npm` / `pnpm`), verified: `node -v`.
+- **VSCode** with the Claude Code extension.
+- A GitHub account (for shipping).
 
 ---
 
 ## Phase 0 - Environment ready
 
-Confirm the runtime and Claude Code are installed, then open the project **folder** in
-your editor so the agent gets correct context from the start.
+Confirm the runtime, then know your permission modes - they set the rhythm of a session.
 
-- Install your stack's runtime/SDK and verify its version.
-- Launch Claude Code from inside the project directory.
-- Know your permission modes: **default** (asks before edits), **acceptEdits** (fewer
-  interruptions once you trust the direction), **plan** (read-only). Cycle with `Shift+Tab`.
+- `node -v` returns a version; Claude Code launches from inside the project folder.
+- **default** asks before edits · **acceptEdits** auto-approves edits once you trust the
+  direction · **plan** is read-only (use it for the planning phases). Cycle with `Shift+Tab`.
 
-## Phase 1 - Point the workspace at the project
+## Phase 1 - Scaffold the app
 
-1. Copy the `.claude/` folder into the new project root (see [README §10](../README.md#10-setup-for-a-new-or-existing-project)).
-2. Fill in `CLAUDE.md` → **Project Context**, and especially **Project Boundaries**
-   (`In-scope` / `Out-of-scope`) - this is the single strongest guard against the agent
-   over-building.
-3. Run `/onboard` to auto-populate **Environment Facts** (SDK, OS/shell, DB, container
-   runtime). For a greenfield repo there's little code to map yet; the value is the
-   environment table and the boundaries.
-4. If this is a non-.NET stack, add its layer first via [README §11](../README.md#11-adding-a-new-stack).
+Get to a running baseline before adding anything. Keep the first pass narrow.
 
-## Phase 2 - Plan first (design before code)
-
-Enter **Plan Mode** and run [`grill-me`](../.claude/skills/grill-me/SKILL.md).
-Resolve, one question at a time: actors, core entities, the flow, and the
-tradeoffs - **and lock what v1 will NOT do**.
-
-Then capture it: [`write-a-prd`](../.claude/skills/write-a-prd/SKILL.md) →
-`prd/{feature}-prd.md` (problem, user stories, acceptance criteria, **out-of-scope**).
-
-> Task API v1 out-of-scope example: no auth, no multi-user, no due-date reminders, no
-> UI - just a REST API with an in-memory or single-table store.
-
-## Phase 3 - Slice into buildable phases
-
-[`prd-to-plan`](../.claude/skills/prd-to-plan/SKILL.md) → `plans/{feature}-plan.md`.
-Each phase is a **vertical tracer bullet** cutting end-to-end (route + logic + test),
-not a horizontal layer.
-
-For a non-trivial build, run [`scratchpad`](../.claude/skills/scratchpad/SKILL.md) first:
-map the system, list edge cases, note risks, draft ADRs. It survives `/clear` and
-interrupted sessions and becomes your recovery anchor.
-
-## Phase 4 - Controlled first pass (scaffold)
-
-Build **phase 1 only** - the narrowest slice that runs. Prefer a skeleton/tracer bullet
-over a full feature. If scaffolding from scratch, structure the generation request the
-way the book does - a blueprint, not a wish:
-
-```
-goal → project overview → stack + key dependencies → folder structure →
-security expectations → error-handling expectations → what NOT to include (v1)
+```bash
+npx create-next-app@latest task-board --typescript --tailwind --eslint --app
+cd task-board
+npm run dev        # confirm it runs at http://localhost:3000
 ```
 
-Then run it immediately and fix the first errors (missing deps, config/env) as they
-appear. A narrower first prompt yields a more stable scaffold.
+A narrower start yields a more stable scaffold. Don't add auth, a database, or state
+libraries yet - you don't need them to render a board.
 
-## Phase 5 - The build loop (per phase)
+## Phase 2 - Point the workspace at the project
 
-Drive each plan phase through [`do-work`](../.claude/skills/do-work/SKILL.md):
+1. Copy the workspace into the new repo (see [Setup for a project](../README.md#setup-for-a-project)):
+   ```bash
+   cp -r /path/to/my-frontend-workspace/.claude ./
+   ```
+2. Open the folder in VSCode - `frontend-craft` and `nextjs-patterns` auto-load on `.tsx`.
+3. Fill in `CLAUDE.md` → **Project Context** and especially **Project Boundaries**
+   (`In-scope` / `Out-of-scope`). This is the strongest guard against over-building.
+4. Run `/onboard` to populate **Environment Facts** (Node, package manager, Next version,
+   deploy target).
+
+## Phase 3 - Plan the first feature
+
+Enter Plan Mode and run [`grill-me`](../.claude/skills/grill-me/SKILL.md). Resolve, one
+question at a time: the actors, the core entities, the flow - **and lock what v1 will NOT
+do**.
+
+> **Task Board v1 out-of-scope:** no accounts/auth, no real backend (tasks live in local
+> state / a mock API), no drag-and-drop reordering, no due dates. Just: view three columns,
+> add a task, move a task between columns.
+
+When behaviour is clear but the *look* isn't, don't pin down layout in words - go to the
+next phase.
+
+## Phase 4 - Settle the look (mockup-first)
+
+Run [`build-prototype`](../.claude/skills/build-prototype/SKILL.md). It **asks which output
+mode** - pick the lightest that answers the question:
+
+| Mode | Use it when |
+|------|-------------|
+| Text / ASCII wireframe | Deciding the board's structure and hierarchy - no code needed |
+| Local HTML/CSS | Feeling real spacing, typography, and how columns wrap on mobile |
+| Shared artifact | Sharing the board mockup for feedback via a link |
+| In-app variants | Comparing layouts against real data/density inside the app |
+
+For the Task Board, a **local HTML/CSS** mockup of the three columns and a card is usually
+the sweet spot: semantic (`<section>` per column, `<ul>`/`<li>` of `<article>` cards, a real
+`<form>` to add), accessible, and responsive - all per `frontend-craft`. Settle the winning
+layout here; it becomes the blueprint for the components.
+
+## Phase 5 - Slice into buildable phases
+
+[`prd-to-plan`](../.claude/skills/prd-to-plan/SKILL.md) turns the agreed design into
+`plans/{feature}-plan.md` - **vertical slices** that each cut end-to-end (markup + state +
+test), not horizontal layers. A sensible slicing for the board:
+
+1. Static board from mock data (columns + cards render).
+2. Add-a-task form (semantic form, validation, optimistic add).
+3. Move a task between columns (keyboard-accessible).
+4. Wire to a data source (mock API via SWR) with loading / empty / error states.
+
+For a non-trivial build, run [`scratchpad`](../.claude/skills/scratchpad/SKILL.md) first to
+map edge cases and risks; it survives `/clear` and interrupted sessions.
+
+## Phase 6 - Build the UI, phase by phase
+
+Drive each slice through [`do-work`](../.claude/skills/do-work/SKILL.md):
 
 ```
-map → implement (this phase only) → your build command → your test command → fix → repeat
+map → implement (this slice only) → npm run build / tsc --noEmit → npm test → fix → repeat
 ```
 
-Run and test after **every** meaningful change so a failure maps to one change. When a
-bug is hard or flaky, escalate to [`diagnose`](../.claude/skills/diagnose/SKILL.md).
-Do not let the agent implement a large multi-part feature in one unreviewed pass.
+Build every component to the `frontend-craft` standard, and let the workspace enforce it:
 
-## Phase 6 - Add features iteratively
+- **Semantic + accessible markup** - real `<section>`/`<ul>`/`<article>`/`<button>`/`<form>`
+  with labels; keyboard-operable; a11y is part of the build, not a later pass.
+- **Data contract** - client data through an SWR hook with standardized
+  `isLoading / error / data`; render **loading, empty, and error** states, not just the
+  happy path.
+- **Server vs client** - keep components server-rendered by default; add `"use client"`
+  only where interaction needs it, as low in the tree as possible.
 
-Layer features one at a time. Two book lessons matter most here:
-
-- **Wrap external services behind an interface** (an AI provider, a queue, a payment
-  SDK). Business logic depends on the abstraction, so you can swap OpenAI ↔ a local
-  model, or SQS ↔ an in-memory stub, without touching core code.
-- **Feed concrete environment facts** into the request (host:port, model/version,
-  region) rather than letting the agent guess - the same facts recorded in CLAUDE.md.
+When a bug is hard or flaky, escalate to [`diagnose`](../.claude/skills/diagnose/SKILL.md).
+Don't let the agent implement several slices in one unreviewed pass.
 
 ## Phase 7 - Handle regressions & polish
 
-Real product rhythm: a new feature lands and exposes a weakness elsewhere (a layout
-breaks when content grows; a query slows under real data). When you change existing
-code, apply [`safe-modification`](../.claude/rules/safe-modification.md): map first,
-keep the change localized, and **list the behaviours that must stay unchanged** and how
-you preserved them.
+Real product rhythm: a new slice exposes a weakness elsewhere - the columns break when a
+card's text grows, or the layout shifts on mobile. When you touch existing code, apply
+[`safe-modification`](../.claude/rules/safe-modification.md): map first, keep the change
+localized, and **list the behaviours that must stay unchanged** and how you preserved them.
+Watch layout shift (CLS) and add `next/image` for any real images.
 
 ## Phase 8 - Harden & ship to production
 
-This is where the workspace goes **beyond** the beginner tutorial. Before every PR:
+Before every PR, run the pre-PR gate:
 
-- [`ship-feature`](../.claude/skills/ship-feature/SKILL.md) → runs `/code-review` →
+- [`ship-feature`](../.claude/skills/ship-feature/SKILL.md) → `/code-review` →
   `/security-review` → `/test-coverage` → `/pr-summary`. Stops at Critical findings.
-- The `performance-analyzer` agent on any changed hot path (Core Web Vitals);
-  `/security-review` on anything touching auth, RBAC, or payments.
-- After deploy: watch the first 30 minutes; treat an error-rate spike as an incident —
-  triage before debugging.
+- **Accessibility**: run axe (`@axe-core/playwright`) and fix violations; keyboard-test the
+  add and move flows.
+- **Performance**: Lighthouse CI against Core Web Vitals (LCP / CLS / INP); the
+  `performance-analyzer` agent on any slow interaction.
+- **Security**: no secrets in client code; if you later add a backend, auth/RBAC is enforced
+  server-side, never client-only.
+- **Ship**: push to GitHub, deploy (e.g. Vercel), then watch the first 30 minutes; treat an
+  error-rate spike as an incident - triage before debugging.
+
+---
+
+## Verify - what "done" looks like
+
+- The board renders three columns from data, with working loading / empty / error states.
+- Add-a-task and move-a-task work by **keyboard** as well as mouse; every control is labelled.
+- `npm run build` is clean (no `ignoreBuildErrors`/`@ts-ignore`); axe reports no violations;
+  Lighthouse a11y and performance meet your budget.
+- `ship-feature` passes with no open Critical findings.
+
+## What you learned
+
+The frontend loop is: **plan → see it (mockup) → slice → build to the craft → harden →
+ship.** The mockup settles the look before code; `frontend-craft` keeps every slice
+semantic and accessible; `nextjs-patterns` handles the React/Next specifics; and the pre-PR
+gate makes "production-ready" a checklist, not a hope. Swap Next for another stack later and
+only the thin framework layer changes - this flow stays the same.

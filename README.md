@@ -79,7 +79,8 @@ For a frontend developer, seeing the interface is part of clarifying the require
 **Prerequisites:** Node.js, a package manager (npm/pnpm), VSCode with the Claude Code
 extension, and a frontend repo to work in.
 
-1. **Copy `.claude/` into your repo root.** (Copy `docs/` too for the build guide.)
+1. **Copy `.claude/` into your repo root.** (Copy `docs/` too for the
+   [build guide](docs/HOW-TO-BUILD-A-PROJECT.md).)
    ```bash
    cp -r my-frontend-workspace/.claude your-app/
    ```
@@ -95,6 +96,10 @@ extension, and a frontend repo to work in.
 ---
 
 ## The daily workflow
+
+> **Starting a brand-new app from an empty folder?** Follow the end-to-end
+> **[build guide](docs/HOW-TO-BUILD-A-PROJECT.md)** (empty folder → shipped Next.js app).
+> The rest of this section is the day-to-day loop once the project exists.
 
 ### Pick your entry point
 
@@ -205,7 +210,8 @@ Frontend: `naming-typescript` · `methods-and-components` · `async-nextjs` ·
 ### Also inside
 
 - `context/` - `architecture-nextjs` · `templates-nextjs` · `testing-nextjs` (reference material).
-- `docs/HOW-TO-BUILD-A-PROJECT.md` - a language-agnostic zero-to-production build guide.
+- **[docs/HOW-TO-BUILD-A-PROJECT.md](docs/HOW-TO-BUILD-A-PROJECT.md)** — a mockup-first,
+  zero-to-production build guide (walks a Next.js **Task Board** from empty folder to shipped).
 - `settings.json` - npm/node permissions, a Stop-hook reminder, and a deny-list for
   process-killing commands.
 

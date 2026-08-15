@@ -1,0 +1,15 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+*.swp
+
+# Claude Code local overrides (personal, not shared)
+.claude/settings.local.json
+
+# Per-project artifacts (created when the workspace is copied into a real app)
+prd/
+plans/
+scratchpad/

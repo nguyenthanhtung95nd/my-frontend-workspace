@@ -115,6 +115,7 @@ Code review and security review run as the pre-PR **commands** (`/code-review`,
 | `ship-feature` | Pre-PR orchestrator — runs all 4 review steps |
 | `build-prototype` | Throwaway UI mockup — asks output: wireframe / local HTML-CSS / shared artifact / in-app variants; or logic/state. Central to FE work |
 | `diagnose` | Hard or flaky bugs — feedback loop |
+| `self-learning` | Study a course/book/mindset with active recall, teach-back & spaced review (`/self-learning <topic>`) |
 | `frontend-craft` | **Auto-loads on any FE file** (.tsx/.jsx/.vue/.svelte/.astro/.razor/.html/.css) — framework-agnostic mindset: semantic HTML, CSS craft, accessibility, prompt framework |
 | `nextjs-patterns` | **Auto-loads on .tsx/.jsx/next.config** — React/Next layer on `frontend-craft`: RSC/hydration, next/image, SWR, security |
 

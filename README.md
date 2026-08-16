@@ -169,7 +169,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 
 ## Reference
 
-### Skills (10)
+### Skills (11)
 
 | Skill | Use it to… |
 |-------|-----------|
@@ -181,6 +181,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 | `ship-feature` | Run the full pre-PR gate in one command |
 | `build-prototype` | Settle "what should this look like" - 4 output modes |
 | `diagnose` | Work a hard or flaky bug through a structured loop |
+| `self-learning` | Study a course / book / mindset — active recall, teach-back, spaced review |
 | `frontend-craft` | *(auto)* Framework-agnostic craft: semantic HTML, CSS, a11y, prompt framework |
 | `nextjs-patterns` | *(auto)* React/Next specifics: RSC, hydration, next/image, SWR, security |
 

@@ -26,11 +26,11 @@ existing patterns, and integration layers before slicing.
 ### 3. Identify durable architectural decisions
 Before defining phases, extract high-level decisions that will remain stable
 throughout implementation. These anchor every phase:
-- Route structures / URL patterns (ASP.NET Core) or event sources (Lambda)
-- Database schema shape
-- Key data models
-- Authentication / authorization approach
-- Third-party service boundaries
+- Route structure / URL patterns (App Router) and the Server/Client boundary
+- Data model / Firestore collections shape
+- Key TypeScript types shared across layers
+- Authentication / authorization approach (where each check is enforced)
+- Third-party service boundaries (Firebase, Stripe) wrapped in `/lib`
 
 ### 4. Draft vertical slices
 Break the PRD into tracer bullet phases. Each phase must be a **thin vertical
@@ -65,10 +65,10 @@ plans/{kebab-case-feature-name}-plan.md
 ## Architectural Decisions
 
 Durable decisions that apply across all phases:
-- **Stack:** ASP.NET Core Web API / AWS Lambda
-- **Routes / Events:** ...
-- **Schema:** ...
-- **Key models:** ...
+- **Stack:** Next.js (App Router) / React / TypeScript
+- **Routes / Boundary:** ...
+- **Data model:** ...
+- **Key types:** ...
 - **Auth:** ...
 
 ---
@@ -83,8 +83,9 @@ Durable decisions that apply across all phases:
 ### Acceptance criteria
 - [ ] {Criterion 1}
 - [ ] {Criterion 2}
-- [ ] Build passes: `dotnet build`
-- [ ] Tests pass: `dotnet test`
+- [ ] Loading / empty / error states implemented
+- [ ] Build passes: `npm run build`
+- [ ] Tests pass: `npm test`
 
 ---
 

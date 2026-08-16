@@ -2,9 +2,9 @@
 name: do-work
 description: >
   Executes a unit of work end-to-end: plans the change, implements it,
-  validates via build and test for the detected stack, then produces a
-  structured Work Summary. Use when the user asks to implement a feature,
-  fix a bug, refactor code, or do any concrete development task.
+  validates via build, type-check, and test (Next.js / React / TypeScript),
+  then produces a structured Work Summary. Use when the user asks to implement
+  a feature, fix a bug, refactor code, or do any concrete development task.
 ---
 
 # Do Work
@@ -39,19 +39,19 @@ production code. Build UI to the `frontend-craft` standard (semantic, accessible
 For non-trivial changes, prefer running the `scratchpad` skill first and reading
 `scratchpad/{feature}-scratchpad.md` here instead of replanning.
 
-### 2. Detect stack
+### 2. Build & test commands
 
-Scan the project root for indicator files, then use the matching build and test toolchain:
+This is a Next.js / React / TypeScript project. Use the project's package manager —
+detect it from the lockfile:
 
-| Indicator file | Stack | Build | Test |
-|----------------|-------|-------|------|
-| `*.csproj` / `*.sln` | .NET | `dotnet build` | `dotnet test` |
-| `package.json` | Node / TypeScript | `npm run build` | `npm test` |
-| `go.mod` | Go | `go build ./...` | `go test ./...` |
-| `requirements.txt` / `pyproject.toml` | Python | — | `pytest` |
-| `Cargo.toml` | Rust | `cargo build` | `cargo test` |
+| Lockfile | Package manager | Build | Test |
+|----------|-----------------|-------|------|
+| `pnpm-lock.yaml` | pnpm | `pnpm build` | `pnpm test` |
+| `yarn.lock` | yarn | `yarn build` | `yarn test` |
+| `package-lock.json` (default) | npm | `npm run build` | `npm test` |
 
-For .NET: scan the project structure to locate the correct `.sln` or `.csproj` path before running.
+Also run `tsc --noEmit` for type-checking, and `npx playwright test` where an e2e flow
+is relevant.
 
 ### 3. Implement
 
@@ -63,15 +63,15 @@ Make only the changes identified in the plan:
 
 ### 4. Build feedback loop
 
-Run the build command for the detected stack. Fix compilation errors before moving on.
-Repeat until build is clean.
+Run the build command (plus `tsc --noEmit`). Fix compilation and type errors before
+moving on. Repeat until build is clean — never silence errors with `@ts-ignore` or
+`ignoreBuildErrors`.
 
 ### 5. Test feedback loop
 
-Run the test command for the detected stack. Fix any failing tests.
-Repeat build → test loop until all tests pass.
+Run the test command. Fix any failing tests. Repeat build → test loop until all pass.
 
-If integration tests are relevant, run them against the same project path.
+If e2e tests are relevant, run `npx playwright test` for the affected flows.
 
 ### 6. Validate unchanged behavior
 

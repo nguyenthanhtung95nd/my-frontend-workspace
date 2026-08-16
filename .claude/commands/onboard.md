@@ -1,86 +1,101 @@
+---
+allowed-tools: Read(*), Bash(git*), Bash(npm:*), Bash(pnpm:*), Bash(node:*)
+description: Map a new frontend codebase and populate the Environment Facts table in CLAUDE.md. Read-only — suggests nothing to change during onboarding. Run once when setting up a project.
+---
+
 # Onboard to a New Codebase
 
-You are a senior .NET engineer helping orient a developer to an unfamiliar codebase so they can contribute safely and quickly.
+You are a senior frontend engineer helping orient a developer to an unfamiliar
+**Next.js / React / TypeScript** codebase so they can contribute safely and quickly.
 
 ## Context
-Stack: C# / .NET, ASP.NET Core Web API, Entity Framework Core.
-Goal: understand the codebase well enough to make changes safely — as fast as possible, without breaking things.
-Mindset: read first, understand second, contribute third.
+Stack: Next.js (App Router) · React · TypeScript · Tailwind. Data: SWR / React Query.
+BaaS: Firebase (Auth, Firestore) · Stripe. Deploy: Vercel.
+Goal: understand the codebase well enough to change it safely — as fast as possible,
+without breaking things. Mindset: read first, understand second, contribute third.
 
 ## Constraints
-- Do not suggest modifying any code during the onboarding phase
-- Flag anything that is unclear rather than guessing
-- Identify risks before recommending where to start contributing
-- Map dependencies before suggesting any changes
-- "I don't know" is a valid output — document it rather than inventing an answer
+- Do not modify any code during onboarding.
+- Flag anything unclear rather than guessing.
+- Identify risks before recommending where to start.
+- Map dependencies (data flow, shared `/lib`, client/server boundary) before suggesting changes.
+- "I don't know" is a valid output — document it rather than inventing an answer.
 
 ## Onboarding Levels
 
-### Level 1 — Orientation (Day 1, ~2 hours)
+### Level 1 — Orientation (Day 1)
 Goal: understand what this system does and how it is structured.
+1. What is the business domain and purpose of the app?
+2. What are the primary user-facing features and routes?
+3. What is the rendering strategy — mostly Server Components, or client-heavy?
+4. What are the core data entities / collections?
+5. What external systems does it integrate with (Firebase, Stripe, REST APIs)?
 
-Questions to answer:
-1. What is the business domain and purpose of this system?
-2. What are the primary user-facing features?
-3. What is the high-level architecture — monolith, microservices, or event-driven?
-4. What are the core data entities?
-5. What external systems does it integrate with?
+Deliverable: a mental map a new engineer can explain to someone else.
 
-Deliverable: a mental map of the system that a new engineer can explain to someone else.
-
-### Level 2 — Navigation (Days 2–3, ~4 hours)
-Goal: know how to find things and understand how data flows.
-
-Questions to answer:
-1. How is the project structured — what is in each folder?
-2. How does a request flow through the system — Controller → Service → Repository → Database?
-3. Where is configuration managed?
-4. Where are tests, and what is the testing strategy?
-5. How is authentication and authorization handled?
-6. What is the deployment process?
+### Level 2 — Navigation (Days 2–3)
+Goal: know how to find things and how data flows.
+1. How is the project structured — what lives in `/app`, `/components`, `/lib`, `/styles`?
+2. How does a user action flow — component → server action / route handler → data layer
+   (`/lib`) → Firestore/API → back?
+3. Where is configuration and env managed (`.env.local`, `next.config`, `NEXT_PUBLIC_*`)?
+4. Where are tests, and what is the strategy (Jest + RTL, MSW, Playwright)?
+5. How are authentication and RBAC handled — and **where is each enforced** (client vs
+   server vs Firestore rules)?
+6. What is the deploy process (Vercel preview/prod, envs)?
 
 Deliverable: can locate any piece of code when asked.
 
-### Level 3 — Contribution Readiness (Week 1, ongoing)
-Goal: know what to understand before modifying any code.
-
-Questions to answer:
-1. What are the team's coding conventions?
-2. Which patterns are applied consistently — Result<T>, Repository pattern, CQRS?
-3. What are the known issues and areas of technical debt?
-4. Which areas are fragile or high-risk?
-5. What tests exist, and what is not covered?
-6. What would break if this specific code were changed?
+### Level 3 — Contribution Readiness (Week 1)
+1. What are the team's conventions (component structure, naming, import aliases)?
+2. Which patterns recur — SWR data contract, custom hooks, server-first fetching?
+3. What are the known issues / tech debt (raw `<img>`, client-only auth, `any`, missing states)?
+4. Which areas are fragile or high-risk (auth, payments, data layer, middleware)?
+5. What is tested, and what is not covered?
+6. What would break if a given piece of code changed?
 
 Deliverable: can make changes safely and with confidence.
 
 ## Analysis Framework
 
 **Step 1 — Entry points**
-Identify all ways data enters the system: HTTP endpoints (Controllers), background jobs and hosted services, message consumers (Service Bus, RabbitMQ), scheduled tasks, CLI commands.
-For each: what does it do and who calls it?
+Identify all ways users/data enter: page routes (`/app/**/page.tsx`), route handlers
+(`/app/api/**/route.ts`), server actions, middleware, webhooks (e.g. Stripe). For each:
+what it does and who calls it.
 
-**Step 2 — Core domain model**
-Identify the five to ten most important entities. Understand their key relationships and the invariants that must always hold (e.g., "an Order must always have at least one line item").
-Look for: the `DbContext` to list all entities, domain models or DDD aggregates, and where validation logic lives.
+**Step 2 — Core data model**
+Identify the 5–10 most important entities / Firestore collections and their relationships
+and invariants (e.g. "an order always belongs to a user"). Look for the data-access layer
+in `/lib`, the type definitions, and where validation lives.
 
-**Step 3 — Data flow**
-Trace a typical user journey from the HTTP request through every layer to the database and back. Understand what can fail at each step and what the retry or compensation strategy is.
+**Step 3 — Data flow & boundary**
+Trace a typical journey (e.g. add to cart → checkout) through every layer. Note the
+Server/Client boundary (`"use client"`), where fetching happens (server vs SWR), and where
+each step can fail (loading / empty / error / forbidden states).
 
 **Step 4 — Risk map**
-Identify the highest-risk areas: payment processing, authentication and authorization, data migration scripts, external API integrations, batch processing jobs.
-Note areas with no test coverage, `TODO` / `HACK` / `FIXME` comments, and code modified recently (use `git blame`).
+Highest-risk areas: auth & RBAC, Stripe payments, Firestore/Storage security rules, the
+`/lib` data layer, middleware. Note areas with no tests, `TODO`/`HACK`/`FIXME`, and code
+changed recently (use `git log`).
 
 **Step 5 — Convention extraction**
-Read three to five existing implementations of the same pattern — three Repository classes, three Controller actions, three Service methods. Extract what they all have in common — that is the team convention. Note what varies — that is either inconsistency or intentional variation.
+Read 3–5 existing implementations of the same pattern — three components, three custom
+hooks, three route handlers. What they share is the convention; what varies is either
+inconsistency or intentional variation.
 
 **Step 6 — Environment Facts (write into CLAUDE.md)**
-Detect the real environment and record it in the `### Environment Facts` table under `## Project Context` in `.claude/CLAUDE.md`. **Preserve all other content in the file — only fill/update that table.**
+Detect the real environment and record it in the `### Environment Facts` table under
+`## Project Context` in `.claude/CLAUDE.md`. **Preserve all other content — only fill/update
+that table.**
 
 - Use **PowerShell commands only** (this session runs in PowerShell, not bash).
-- Detect only tools relevant to this project: OS, PowerShell version, .NET SDK (`dotnet --version`), Node.js if a `package.json` exists, Docker (`docker --version`), and the database/cache/queue endpoints found in config (`appsettings*.json`, `.env`, CDK/IaC).
-- Do **not** scan for unrelated toolchains (Go, Rust, Ruby, yarn, etc.).
-- Environment facts are hard facts, not preferences — if a value cannot be determined, write "unknown" rather than guessing.
+- Detect only what is relevant: OS, PowerShell version, Node.js (`node --version`), package
+  manager (presence of `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock`), Next.js
+  version (`package.json`), backend/BaaS (Firebase config, REST host, or "none"), deploy
+  target (`vercel.json` / project settings, or "unknown").
+- Do **not** scan for unrelated toolchains (.NET, Go, Rust, Ruby).
+- Environment facts are hard facts, not preferences — if a value can't be determined, write
+  "unknown" rather than guessing.
 
 ## Output Format
 
@@ -88,33 +103,35 @@ Detect the real environment and record it in the `### Environment Facts` table u
 ```
 System:       [name]
 Domain:       [business problem it solves]
-Scale:        [users, requests per day, data volume — if determinable]
-Architecture: [monolith | microservices | hybrid]
-Tech stack:   [language, framework, database, cloud provider]
+Scale:        [users, traffic — if determinable]
+Rendering:    [server-first | client-heavy | hybrid]
+Tech stack:   [Next.js version, React, TS, styling, BaaS, deploy]
 ```
 
 ### Architecture Map
 ```
 Entry points:
-→ [endpoint or job]: [purpose]
+→ [route / route handler / action]: [purpose]
 
-Core entities (top 5):
-→ [Entity]: [role in the system]
+Core entities / collections (top 5):
+→ [entity]: [role in the system]
 
 Key integrations:
-→ [external system]: [how it is used]
+→ [Firebase / Stripe / API]: [how it is used]
 
-Main request flow:
-[Controller] → [Service] → [Repository] → [Database]
+Main data flow:
+[Component] → [server action / route handler] → [/lib data access] → [Firestore/API]
+             ↑ auth + RBAC enforced here
 ```
 
 ### Convention Summary
 ```
-Error handling:  [Result<T> | exceptions | mixed]
-Async pattern:   [async/await throughout | mixed | partially]
-DI approach:     [constructor injection | property injection | mixed]
-Test framework:  [xUnit | NUnit | coverage level]
-Naming:          [PascalCase methods | _camelCase fields | etc.]
+Data fetching:   [Server Components | SWR | React Query | mixed]
+State/derivation:[derived from source | redundant useState — flag it]
+Client boundary: [pushed low | too high — flag it]
+Auth/RBAC:       [server-enforced | client-only — flag it]
+Test framework:  [Jest + RTL + MSW | Playwright | coverage level]
+Naming/aliases:  [PascalCase components, useX hooks, @/ alias | inconsistencies]
 ```
 
 ### Risk Map
@@ -139,8 +156,7 @@ Not yet understood:
 ### Safe First Contributions
 ```
 Low-risk starting tasks (high learning value):
-1. [task]: [why this is a good first contribution]
-2. [task]: [why this is a good first contribution]
+1. [task]: [why it is a good first contribution]
 
 Areas to avoid until week 2 or later:
 1. [area]: [reason to wait]
@@ -149,7 +165,5 @@ Areas to avoid until week 2 or later:
 ### Questions for the Team
 ```
 Before modifying anything, I need to understand:
-1. [question]: [why this matters]
-2. [question]: [why this matters]
-3. [question]: [why this matters]
+1. [question]: [why it matters]
 ```

@@ -17,28 +17,25 @@ When exploring the codebase, use the project's domain glossary to get a clear me
 
 Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
 
-### Detect your stack first
+### Reach for the fastest loop this stack allows
 
-Scan the project root for indicator files, then use the matching toolchain — it is faster and more deterministic than a generic approach.
+This is a Next.js / React / TypeScript project. Prefer the narrowest, most deterministic
+signal that still reaches the bug — a focused unit/component test beats a full e2e run:
 
-| Indicator file | Stack | Preferred loop tools |
-|----------------|-------|---------------------|
-| `*.csproj` / `*.sln` | .NET | See .NET section below |
-| `package.json` | Node / TypeScript | `jest --testNamePattern`, `vitest --reporter=verbose`, `npm test -- --watch` |
-| `go.mod` | Go | `go test -run TestName -v -count=1` |
-| `requirements.txt` / `pyproject.toml` | Python | `pytest -k test_name -s -x` |
-| `Cargo.toml` | Rust | `cargo test test_name -- --nocapture` |
+- **Unit / component:** `jest --watch --testNamePattern "..."` (or `vitest --reporter=verbose`)
+  with React Testing Library — assert by role, not by test-id.
+- **UI flow:** Playwright headless (`--trace on`) — drives the flow, asserts on DOM/console/network.
 
-**For .NET — additional seams:**
+**Next.js / React — seams:**
 
 | Seam | Technique |
 |------|-----------|
-| Fast unit loop | `dotnet test --filter "FullyQualifiedName~ClassName"` |
-| Sub-2s loop on save | `dotnet watch test --filter "..."` |
-| Full ASP.NET Core pipeline | `WebApplicationFactory<Program>` + `HttpClient` — no real server needed |
-| N+1 / wrong query | `optionsBuilder.EnableSensitiveDataLogging().LogTo(Console.WriteLine)` or set log level `Microsoft.EntityFrameworkCore.Database.Command` → `Information` |
-| Real DB required | Testcontainers — spin up a SQL Server / Postgres container inside the test |
-| Lambda + SQS | Save raw SQS event JSON from CloudWatch; replay via `Function.FunctionHandler()` in a local xUnit test |
+| Fast component loop | `jest --watch --testNamePattern "..."` with React Testing Library — assert by role |
+| Hydration mismatch | Compare server vs client HTML; check the React hydration warning in the console; guard `Date`/locale/`typeof window`/random |
+| Network-dependent bug | **MSW** — mock the exact response/status/latency that triggers it; no real backend needed |
+| UI-only repro | **Playwright** — drive the flow headless, assert on DOM/console/network; save a trace (`--trace on`) to replay |
+| Server/Client boundary | Isolate the failing component; confirm `"use client"` placement and that no server-only API leaks into the client |
+| Data-layer / SWR bug | Call the `/lib` fetcher directly in a unit test with a captured payload; check cache key + dedup behaviour |
 
 ### Ways to construct one — try them in roughly this order
 
@@ -73,7 +70,7 @@ If after 3 attempts the rate stays below ~10%, treat this as "cannot build a loo
 
 ### When you genuinely cannot build a loop
 
-Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a captured artifact (HAR file, structured log export, Application Insights trace, SQS DLQ message body, core dump, screen recording with timestamps), or (c) permission to add temporary production instrumentation. Do **not** proceed to hypothesise without a loop.
+Stop and say so explicitly. List what you tried. Ask the user for: (a) access to whatever environment reproduces it, (b) a captured artifact (HAR file, browser console/network export, Playwright trace, Sentry/error-monitoring trace, screen recording with timestamps), or (c) permission to add temporary instrumentation to a preview/production build. Do **not** proceed to hypothesise without a loop.
 
 Do not proceed to Phase 2 until you have a loop you believe in.
 
@@ -113,7 +110,7 @@ Tool preference:
 
 **Tag every debug log** with a unique prefix, e.g. `[DEBUG-a4f2]`. Cleanup at the end becomes a single grep. Untagged logs survive; tagged logs die.
 
-**Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (timing harness — `Stopwatch`/`BenchmarkDotNet` in .NET, `performance.now()` in JS, `time.perf_counter()` in Python — or a profiler / query plan), then bisect. Measure first, fix second.
+**Perf branch.** For performance regressions, logs are usually wrong. Instead: establish a baseline measurement (React DevTools Profiler for re-renders, the browser Performance panel / Lighthouse for Core Web Vitals, `performance.now()` for a specific path, or a network waterfall), then bisect. Measure first, fix second.
 
 ## Phase 5 — Fix + regression test
 

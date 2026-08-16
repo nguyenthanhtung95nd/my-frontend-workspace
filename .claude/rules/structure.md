@@ -9,84 +9,88 @@
 
 ## Single Responsibility Principle (SRP) — Most Critical
 
-- Every method, class, and module does **exactly one thing**.
-- If a class name contains "And" → split it. (`OrderValidatorAndSaver` → two classes)
+- Every function, hook, component, and module does **exactly one thing**.
+- If a name contains "And" → split it. (`validateAndSaveOrder` → two functions.) A component
+  that fetches, transforms, and renders is three things — extract the data into a hook.
 - No nested `if` blocks beyond 2 levels. No nested `try/catch`.
 
 ## Size Limits
 
-- Methods: **< 20 lines**
-- Classes: **< 50 lines** (excluding auto-properties and constructors)
+- Functions/hooks: **< 20 lines**
+- Components: **< 150 lines** — if it mixes layout + data + business rules, split it
+  (extract `ProductCard` from `ProductGrid`).
 - The more complex the logic, the shorter it must be.
 
 ## DRY — Don't Repeat Yourself
 
-- Never copy-paste logic. Extract into a shared method, extension method, or service.
-- Exception: duplicating 2–3 trivial lines is acceptable if abstraction adds more indirection than value.
+- Never copy-paste logic. Extract into a shared function (`/lib`), a custom hook, or a
+  component.
+- Exception: duplicating 2–3 trivial lines is acceptable if abstraction adds more
+  indirection than value.
 
 ## Levels of Abstraction
 
-- Each method operates at **one level of abstraction** only.
-- High-level methods call mid-level methods — they do not contain low-level detail.
+- Each function operates at **one level of abstraction** only.
+- High-level code calls mid-level helpers — it does not contain low-level detail.
 
-```csharp
-// Bad — controller bypasses service layer
-public async Task<IActionResult> CreateOrder(CreateOrderRequest request)
-{
-    var entity = new Order { /* mapping */ };
-    await _dbContext.Orders.AddAsync(entity);
-    await _dbContext.SaveChangesAsync();
-    return Ok();
+```tsx
+// Bad — route handler bypasses the data layer
+export async function POST(req: Request) {
+  const body = await req.json()
+  const ref = await addDoc(collection(db, 'orders'), { ...body, createdAt: Date.now() })
+  return Response.json({ id: ref.id })
 }
 
-// Good
-public async Task<IActionResult> CreateOrder(CreateOrderRequest request)
-{
-    var result = await _orderService.CreateAsync(request);
-    return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+// Good — thin handler delegates to /lib
+export async function POST(req: Request) {
+  const result = await orderService.create(await req.json())
+  return result.ok
+    ? Response.json(result.value)
+    : Response.json({ error: result.error }, { status: 400 })
 }
 ```
 
-## Variables & Properties
+## Variables & State
 
-- Declare variables **as close as possible** to where they are used.
-- Always initialize at declaration.
-- Use `var` when the type is obvious; explicit types when it aids clarity.
-- Prefer `readonly` fields and `init`-only properties wherever possible.
-- **No static mutable state** — avoid `static` fields that change at runtime.
+- Declare variables **as close as possible** to where they are used, and initialize at
+  declaration.
+- Prefer `const`; use `let` only when reassignment is genuinely needed. Never `var`.
+- Mark immutable data `readonly` / `as const`; type props as read-only contracts.
+- **No module-level mutable state** — no top-level `let` that changes at runtime as a
+  hidden store. Component state belongs in `useState`/store, shared data in a cache layer.
+- **Derive state, don't duplicate it** — `isLoading`/`isEmpty` come from one source; don't
+  track them as separate `useState`.
 
 ## Conditionals & Control Flow
 
 - **Minimize boolean logic** — it is the highest source of bugs.
-- Replace `if/else if` chains with polymorphism, strategy pattern, or dictionaries.
-- Use **enums** instead of string comparisons. Convert strings to enums at the system entry point.
+- Replace `if/else if` chains with a lookup map, a discriminated union, or polymorphism.
+- Use **union types / enums** instead of loose string comparisons; narrow at the boundary.
 - Use **guard clauses** (early returns) to reduce nesting.
 
-```csharp
+```tsx
 // Bad
-public void Process(Order order)
-{
-    if (order != null)
-    {
-        if (order.IsValid)
-        {
-            // logic buried 2 levels deep
-        }
+function process(order: Order | null) {
+  if (order) {
+    if (order.isValid) {
+      // logic buried 2 levels deep
     }
+  }
 }
 
 // Good
-public void Process(Order order)
-{
-    if (order is null) throw new ArgumentNullException(nameof(order));
-    if (!order.IsValid) return;
+function process(order: Order | null) {
+  if (!order) return
+  if (!order.isValid) return
 
-    // logic at top level
+  // logic at top level
 }
 ```
 
 ## Null Handling
 
-- Enable **Nullable Reference Types** in all projects: `<Nullable>enable</Nullable>` in `.csproj`.
-- Never return `null` from a method that returns a collection — return an empty collection.
-- Use `ArgumentNullException.ThrowIfNull()` for null guard checks (.NET 6+).
+- Enable strictness: `"strict": true` (incl. `strictNullChecks`) in `tsconfig.json`.
+  Never disable it or paper over a null with `!` (non-null assertion) or `@ts-ignore`.
+- Never return `null` from a function that returns a collection — return an empty array `[]`.
+- Guard `undefined`/`null` at the boundary (optional chaining `?.`, nullish coalescing `??`,
+  early returns) rather than letting it flow into render and crash the UI.

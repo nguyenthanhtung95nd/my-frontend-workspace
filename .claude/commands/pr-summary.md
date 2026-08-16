@@ -26,9 +26,9 @@ type(scope): short description
 Common types: `feat`, `fix`, `refactor`, `test`, `chore`, `docs`
 
 Examples:
-- `feat(products): add soft delete with IsActive flag`
-- `fix(orders): prevent null reference when description is missing`
-- `refactor(auth): extract JWT validation into middleware`
+- `feat(products): add empty and error states to the product grid`
+- `fix(cart): prevent hydration mismatch in the price formatter`
+- `refactor(auth): move the role check from the client into a server action`
 
 ## PR Body Format
 
@@ -39,8 +39,8 @@ Examples:
 - <any notable decision made — optional>
 
 ## Changes
-- `path/to/File.cs` — <what changed and why>
-- `path/to/FileTests.cs` — <what tests were added or updated>
+- `path/to/Component.tsx` — <what changed and why>
+- `path/to/Component.test.tsx` — <what tests were added or updated>
 
 ## Review notes
 <If /code-review or /security-review found Critical or High issues, list them here with their fix status.>
@@ -48,9 +48,10 @@ Examples:
 <If neither ran: "Run /code-review and /security-review before merging.">
 
 ## Test plan
-- [ ] `dotnet test` passes locally — zero failures
-- [ ] <specific scenario to verify manually>
-- [ ] <integration test scenario if DB or external API is involved>
+- [ ] `npm test` passes locally — zero failures
+- [ ] `npm run build` / `tsc --noEmit` clean
+- [ ] <specific scenario to verify manually — incl. loading / empty / error states>
+- [ ] `npx playwright test` for auth-gated / RBAC flows (if touched)
 
 ## Risks
 <Anything reviewers should pay extra attention to. Examples: schema change, breaking API contract, auth logic touched.>

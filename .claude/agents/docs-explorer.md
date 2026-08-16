@@ -73,14 +73,14 @@ Final fallback — fetch the official docs page and extract relevant content.
 {Practical code snippets from the docs}
 ```
 
-## Common .NET Libraries to Look Up
+## Common Frontend Libraries to Look Up
 
 When working on this codebase, proactively fetch docs for:
-- `microsoft.aspnetcore.ratelimiting` — rate limiting middleware
-- `microsoft.extensions.resilience` — Polly v8 circuit breaker
-- `efcore` — EF Core queries, migrations, configuration
-- `autofac` — DI registration, lifetime scopes
-- `dapper` — query patterns, parameterization
-- `amazon.lambda.sqsevents` — SQS event model
-- `testcontainers` — container fixtures for integration tests
-- `nsubstitute` — mocking API
+- `next` — App Router, Server Components, `next/image`, route handlers, middleware
+- `react` — hooks, Suspense, `use` API, server/client boundaries
+- `swr` / `@tanstack/react-query` — data fetching, caching, mutations
+- `tailwindcss` — utility classes, config, responsive/dark variants
+- `firebase` / `firebase-admin` — Auth, Firestore, Storage, security rules
+- `stripe` / `@stripe/stripe-js` — Payment Intents, Checkout, webhooks
+- `@testing-library/react` / `msw` — component testing, network mocking
+- `@playwright/test` — e2e, fixtures, tracing

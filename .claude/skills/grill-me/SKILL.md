@@ -33,19 +33,25 @@ tree, resolving dependencies between decisions one at a time.
 
 ## Example Conversation
 
-> **You:** I want to add rate limiting to the API so tenants can't abuse it.
+> **You:** I want to add a product search that filters as the user types.
 >
-> **Claude:** First question — where should the limit be enforced?
-> My recommendation: as ASP.NET Core middleware using `Microsoft.AspNetCore.RateLimiting`
-> with a sliding window partitioned by TenantId, since you already have TenantContext
-> in the pipeline. Does that fit, or do you prefer a Redis-backed solution for
-> multi-instance resilience?
+> **Claude:** First question — where should the filtering happen?
+> My recommendation: on the **server** via a route handler / server action, since the
+> catalogue is large and you already fetch products server-side. The client just sends the
+> query. Or do you want purely client-side filtering because the full list is already loaded?
 >
-> **You:** Redis-backed — we run 3 pods on AKS.
+> **You:** Server-side — the catalogue is thousands of items.
 >
-> **Claude:** Next — should limits be uniform across all tenants, or configurable per tenant?
-> My recommendation: configurable via a `TenantRateLimitSettings` table, with a sensible
-> default in `appsettings.json` for tenants without an override. Agree?
+> **Claude:** Next — how do we avoid a request on every keystroke?
+> My recommendation: **debounce** the input (~300ms) and fetch with **SWR** keyed on the
+> query, cancelling superseded requests via `AbortController` (per `async-nextjs.md`). That
+> gives us `isLoading`/`error`/`data` for free. Agree, or do you prefer React Query?
+>
+> **You:** SWR is fine.
+>
+> **Claude:** Then — what should the UI show for each state? My recommendation: a skeleton
+> while loading, an explicit "No results for '<query>'" empty state, and an error state with
+> retry — never a blank list. Sound right?
 
 When all branches are resolved, offer to run `build-prototype` if the look is still
 unsettled, then `/write-a-prd`.

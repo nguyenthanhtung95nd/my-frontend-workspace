@@ -158,6 +158,10 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
   Interact. Asking for everything at once causes omissions.
 - **Trust the pre-PR gate.** Run `ship-feature` before every PR. It's a deterministic,
   ordered batch - distinct from the agents that fire continuously while you code.
+- **Make verification automatic, once.** Run `automate-e2e-self-testing` early in a project
+  to wire a Playwright self-testing loop and a `verify` gate (typecheck → lint → unit →
+  e2e). A soft prompt ("don't use fixed waits") decays next session; a failing check keeps
+  enforcing until deleted. Turn recurring corrections into lint rules and tests, not reminders.
 - **Keep context clean.** `/clear` between distinct tasks; `/compact` when one task runs
   long. If answers start drifting, that's usually stale context, not a bad prompt.
 - **Fill Project Boundaries honestly.** Out-of-scope is what stops the AI from solving a
@@ -169,7 +173,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 
 ## Reference
 
-### Skills (11)
+### Skills (12)
 
 | Skill | Use it to… |
 |-------|-----------|
@@ -181,9 +185,14 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 | `ship-feature` | Run the full pre-PR gate in one command |
 | `build-prototype` | Settle "what should this look like" - 4 output modes |
 | `diagnose` | Work a hard or flaky bug through a structured loop |
+| `automate-e2e-self-testing` | Stand up (or audit) a Playwright E2E self-testing loop — verify gate + guardrails so the agent checks its own UI |
 | `self-learning` | Study a course / book / mindset — active recall, teach-back, spaced review |
 | `frontend-craft` | *(auto)* Framework-agnostic craft: semantic HTML, CSS, a11y, prompt framework |
 | `nextjs-patterns` | *(auto)* React/Next specifics: RSC, hydration, next/image, SWR, security |
+
+> **Three testing jobs, don't confuse them:** the `test-generator` agent writes individual
+> specs, `/test-coverage` reports gaps, and `automate-e2e-self-testing` builds the *harness*
+> they run inside (Playwright config, fixtures, the `verify` gate, guardrails, CI).
 
 ### Agents (4) - auto-delegate
 

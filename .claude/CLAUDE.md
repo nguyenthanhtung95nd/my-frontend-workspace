@@ -115,9 +115,16 @@ Code review and security review run as the pre-PR **commands** (`/code-review`,
 | `ship-feature` | Pre-PR orchestrator — runs all 4 review steps |
 | `build-prototype` | Throwaway UI mockup — asks output: wireframe / local HTML-CSS / shared artifact / in-app variants; or logic/state. Central to FE work |
 | `diagnose` | Hard or flaky bugs — feedback loop |
+| `automate-e2e-self-testing` | Set up or audit a Playwright **E2E self-testing loop** — accessibility-anchored specs + a `verify` gate (typecheck→lint→unit→e2e) + guardrails, so the agent verifies its own UI before human review |
 | `self-learning` | Study a course/book/mindset with active recall, teach-back & spaced review (`/self-learning <topic>`) |
 | `frontend-craft` | **Auto-loads on any FE file** (.tsx/.jsx/.vue/.svelte/.astro/.razor/.html/.css) — framework-agnostic mindset: semantic HTML, CSS craft, accessibility, prompt framework |
 | `nextjs-patterns` | **Auto-loads on .tsx/.jsx/next.config** — React/Next layer on `frontend-craft`: RSC/hydration, next/image, SWR, security |
+
+**Testing layers, three jobs:** `test-generator` (agent) writes individual specs ·
+`/test-coverage` (command) reports gaps · `automate-e2e-self-testing` (skill) builds the
+**harness** — Playwright config, fixtures, the `verify` gate, guardrails, and CI. Run the
+skill once to stand up the self-testing loop (or to audit an existing one); the other two
+operate inside it.
 
 ---
 

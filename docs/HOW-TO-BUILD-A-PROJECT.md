@@ -138,6 +138,13 @@ Build every component to the `frontend-craft` standard, and let the workspace en
 - **Server vs client** - keep components server-rendered by default; add `"use client"`
   only where interaction needs it, as low in the tree as possible.
 
+**Wire the self-testing loop once, early.** As soon as the first slice renders, run
+[`automate-e2e-self-testing`](../.claude/skills/automate-e2e-self-testing/SKILL.md) to stand
+up a Playwright harness — accessibility-anchored specs (`getByRole`, no fixed waits), a
+`verify` gate (typecheck → lint → unit → e2e), and fast git hooks. From then on every slice
+**self-verifies**: the agent runs `verify` and reads its own failure dossier instead of you
+being the feedback loop.
+
 When a bug is hard or flaky, escalate to [`diagnose`](../.claude/skills/diagnose/SKILL.md).
 Don't let the agent implement several slices in one unreviewed pass.
 
@@ -155,6 +162,11 @@ Before every PR, run the pre-PR gate:
 
 - [`ship-feature`](../.claude/skills/ship-feature/SKILL.md) → `/code-review` →
   `/security-review` → `/test-coverage` → `/pr-summary`. Stops at Critical findings.
+- **E2E + guardrails**: if you didn't wire it in Phase 6, run
+  [`automate-e2e-self-testing`](../.claude/skills/automate-e2e-self-testing/SKILL.md) now for
+  the Playwright `verify` gate, dead-code (`knip`) + secret scans, and a CI mirror of the
+  hooks. It keeps external SaaS/MCP tools **GATED** (flagged, never auto-installed) — safe in
+  an enterprise setup.
 - **Accessibility**: run axe (`@axe-core/playwright`) and fix violations; keyboard-test the
   add and move flows.
 - **Performance**: Lighthouse CI against Core Web Vitals (LCP / CLS / INP); the
@@ -172,6 +184,8 @@ Before every PR, run the pre-PR gate:
 - Add-a-task and move-a-task work by **keyboard** as well as mouse; every control is labelled.
 - `npm run build` is clean (no `ignoreBuildErrors`/`@ts-ignore`); axe reports no violations;
   Lighthouse a11y and performance meet your budget.
+- The `verify` gate (typecheck → lint → unit → e2e) exits zero — the machine-checkable
+  definition of "done" from `automate-e2e-self-testing`, not a vibe.
 - `ship-feature` passes with no open Critical findings.
 
 ## What you learned

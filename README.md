@@ -173,7 +173,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 
 ## Reference
 
-### Skills (12)
+### Skills (15)
 
 | Skill | Use it to… |
 |-------|-----------|
@@ -186,13 +186,19 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 | `build-prototype` | Settle "what should this look like" - 4 output modes |
 | `diagnose` | Work a hard or flaky bug through a structured loop |
 | `automate-e2e-self-testing` | Stand up (or audit) a Playwright E2E self-testing loop — verify gate + guardrails so the agent checks its own UI |
+| `react-typescript` | Type a React component/hook idiomatically — unions, generics, props, hooks, events, boundary validation |
+| `frontend-unit-testing` | Write/audit fast Vitest + Testing Library unit tests *(opt-in; workspace default runner is Jest)* |
+| `react-performance` | Diagnose/fix React runtime perf — profiling-first, React 19-aware (Compiler, concurrent, RSC), bundles, CWV |
 | `self-learning` | Study a course / book / mindset — active recall, teach-back, spaced review |
 | `frontend-craft` | *(auto)* Framework-agnostic craft: semantic HTML, CSS, a11y, prompt framework |
 | `nextjs-patterns` | *(auto)* React/Next specifics: RSC, hydration, next/image, SWR, security |
 
-> **Three testing jobs, don't confuse them:** the `test-generator` agent writes individual
-> specs, `/test-coverage` reports gaps, and `automate-e2e-self-testing` builds the *harness*
-> they run inside (Playwright config, fixtures, the `verify` gate, guardrails, CI).
+> **Deep-dive skills vs the always-on layers:** `react-typescript` is the deep companion to
+> the `naming-typescript` rule; `frontend-unit-testing` (Vitest) teaches the discipline the
+> `test-generator` agent and `/test-coverage` operate within — the workspace default runner is
+> **Jest**, so treat the Vitest skill as opt-in; `automate-e2e-self-testing` builds the Playwright
+> E2E harness; and `react-performance` is where the `performance-analyzer` agent escalates for a
+> deep, profiling-first pass. All four ship **Vite-first templates** — adapt them for Next.js.
 
 ### Agents (4) - auto-delegate
 

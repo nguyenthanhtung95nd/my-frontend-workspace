@@ -116,15 +116,27 @@ Code review and security review run as the pre-PR **commands** (`/code-review`,
 | `build-prototype` | Throwaway UI mockup — asks output: wireframe / local HTML-CSS / shared artifact / in-app variants; or logic/state. Central to FE work |
 | `diagnose` | Hard or flaky bugs — feedback loop |
 | `automate-e2e-self-testing` | Set up or audit a Playwright **E2E self-testing loop** — accessibility-anchored specs + a `verify` gate (typecheck→lint→unit→e2e) + guardrails, so the agent verifies its own UI before human review |
+| `react-typescript` | Deep React+TS typing playbook — discriminated-union state, generics, props/hooks/events, Zod boundary validation, strict tsconfig. Invoke when typing or reviewing a component/hook |
+| `frontend-unit-testing` | Unit/component testing discipline (**Vitest** + Testing Library) — TDD, test doubles, mocking recipes, async/edge. *Opt-in: workspace default runner is Jest; the skill detects which runner is present. Templates are Vite-first — adapt for Next.* |
+| `react-performance` | Profiling-first React runtime-perf playbook — React 19 Compiler/concurrent/RSC, re-renders, bundles, Core Web Vitals. Invoke on a slow path (deeper than the `performance-analyzer` agent) |
 | `self-learning` | Study a course/book/mindset with active recall, teach-back & spaced review (`/self-learning <topic>`) |
 | `frontend-craft` | **Auto-loads on any FE file** (.tsx/.jsx/.vue/.svelte/.astro/.razor/.html/.css) — framework-agnostic mindset: semantic HTML, CSS craft, accessibility, prompt framework |
 | `nextjs-patterns` | **Auto-loads on .tsx/.jsx/next.config** — React/Next layer on `frontend-craft`: RSC/hydration, next/image, SWR, security |
 
-**Testing layers, three jobs:** `test-generator` (agent) writes individual specs ·
-`/test-coverage` (command) reports gaps · `automate-e2e-self-testing` (skill) builds the
-**harness** — Playwright config, fixtures, the `verify` gate, guardrails, and CI. Run the
-skill once to stand up the self-testing loop (or to audit an existing one); the other two
-operate inside it.
+**Deep-dive skills — how they relate to the always-on layers:**
+- **Unit/component tests:** the `test-generator` agent writes individual specs · `/test-coverage`
+  reports gaps · `frontend-unit-testing` (skill) teaches the discipline behind them. *Runner
+  note:* the rules and `test-generator` standardize on **Jest**; the skill is **Vitest** and
+  opt-in — use it only where a project adopts Vitest.
+- **E2E:** `automate-e2e-self-testing` builds the Playwright harness — config, fixtures, the
+  `verify` gate, guardrails, and CI. Run it once to stand up the self-testing loop.
+- **Runtime performance:** the `performance-analyzer` agent triages a slow path fast;
+  `react-performance` is the deep, profiling-first playbook it can escalate into.
+- **Types:** `react-typescript` is the deep companion to the `naming-typescript` rule —
+  reach for it on hard typing (generics, discriminated unions, polymorphic props, boundary validation).
+
+> The three `react-*` / `frontend-unit-testing` skills ship **Vite-first templates**; this is a
+> Next.js workspace, so adapt the config (`next.config`, `jsx: preserve`, `NEXT_PUBLIC_*`) when applying them.
 
 ---
 

@@ -137,6 +137,12 @@ Build every component to the `frontend-craft` standard, and let the workspace en
   happy path.
 - **Server vs client** - keep components server-rendered by default; add `"use client"`
   only where interaction needs it, as low in the tree as possible.
+- **Types as design docs** - for anything past trivial props (unions, generics, discriminated
+  state, boundary validation), lean on [`react-typescript`](../.claude/skills/react-typescript/SKILL.md):
+  model invalid states as unrepresentable and validate external data with a schema, don't `as`-cast it.
+- **Unit-test the logic** - cover hooks and pure logic with fast unit tests (Jest by default; the
+  [`frontend-unit-testing`](../.claude/skills/frontend-unit-testing/SKILL.md) skill is the opt-in
+  Vitest discipline). These are the fast base of the pyramid under the E2E loop below.
 
 **Wire the self-testing loop once, early.** As soon as the first slice renders, run
 [`automate-e2e-self-testing`](../.claude/skills/automate-e2e-self-testing/SKILL.md) to stand
@@ -170,7 +176,9 @@ Before every PR, run the pre-PR gate:
 - **Accessibility**: run axe (`@axe-core/playwright`) and fix violations; keyboard-test the
   add and move flows.
 - **Performance**: Lighthouse CI against Core Web Vitals (LCP / CLS / INP); the
-  `performance-analyzer` agent on any slow interaction.
+  `performance-analyzer` agent on any slow interaction. For a deep, profiling-first pass —
+  wasted re-renders, the React 19 Compiler, bundle splitting, list virtualization — escalate to
+  [`react-performance`](../.claude/skills/react-performance/SKILL.md). Measure before and after; never optimize blind.
 - **Security**: no secrets in client code; if you later add a backend, auth/RBAC is enforced
   server-side, never client-only.
 - **Ship**: push to GitHub, deploy (e.g. Vercel), then watch the first 30 minutes; treat an

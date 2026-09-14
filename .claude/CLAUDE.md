@@ -119,6 +119,7 @@ Code review and security review run as the pre-PR **commands** (`/code-review`,
 | `react-typescript` | Deep React+TS typing playbook — discriminated-union state, generics, props/hooks/events, Zod boundary validation, strict tsconfig. Invoke when typing or reviewing a component/hook |
 | `frontend-unit-testing` | Unit/component testing discipline (**Vitest** + Testing Library) — TDD, test doubles, mocking recipes, async/edge. *Opt-in: workspace default runner is Jest; the skill detects which runner is present. Templates are Vite-first — adapt for Next.* |
 | `react-performance` | Profiling-first React runtime-perf playbook — React 19 Compiler/concurrent/RSC, re-renders, bundles, Core Web Vitals. Invoke on a slow path (deeper than the `performance-analyzer` agent) |
+| `deploying-web-apps-aws` | Deploy to **AWS** — S3+CloudFront (static), Lambda/API Gateway/DynamoDB (serverless backend), Route 53/ACM, OIDC CI, least-privilege IAM, cost guards. *Alternative to the default Vercel target (see caveat below)* |
 | `self-learning` | Study a course/book/mindset with active recall, teach-back & spaced review (`/self-learning <topic>`) |
 | `frontend-craft` | **Auto-loads on any FE file** (.tsx/.jsx/.vue/.svelte/.astro/.razor/.html/.css) — framework-agnostic mindset: semantic HTML, CSS craft, accessibility, prompt framework |
 | `nextjs-patterns` | **Auto-loads on .tsx/.jsx/next.config** — React/Next layer on `frontend-craft`: RSC/hydration, next/image, SWR, security |
@@ -137,6 +138,12 @@ Code review and security review run as the pre-PR **commands** (`/code-review`,
 
 > The three `react-*` / `frontend-unit-testing` skills ship **Vite-first templates**; this is a
 > Next.js workspace, so adapt the config (`next.config`, `jsx: preserve`, `NEXT_PUBLIC_*`) when applying them.
+
+> **Deploying to AWS?** `deploying-web-apps-aws` is an alternative to the default **Vercel** target
+> (Tech Stack, above) and to **Firebase** (its Lambda/DynamoDB backend). Its S3+CloudFront path hosts a
+> **static** build only (`output: 'export'`, or a Vite SPA) — an App Router app with Server Components /
+> route handlers / SSR needs a server host (**OpenNext / SST / Amplify Hosting**), not plain S3. Reach
+> for the skill when a project deploys to AWS for enterprise reasons; otherwise Vercel handles SSR/RSC out of the box.
 
 ---
 

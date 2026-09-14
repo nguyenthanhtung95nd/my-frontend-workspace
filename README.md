@@ -173,7 +173,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 
 ## Reference
 
-### Skills (15)
+### Skills (16)
 
 | Skill | Use it to… |
 |-------|-----------|
@@ -189,6 +189,7 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 | `react-typescript` | Type a React component/hook idiomatically — unions, generics, props, hooks, events, boundary validation |
 | `frontend-unit-testing` | Write/audit fast Vitest + Testing Library unit tests *(opt-in; workspace default runner is Jest)* |
 | `react-performance` | Diagnose/fix React runtime perf — profiling-first, React 19-aware (Compiler, concurrent, RSC), bundles, CWV |
+| `deploying-web-apps-aws` | Deploy to AWS (S3+CloudFront + Lambda/API Gateway/DynamoDB) — secure IAM, OIDC CI, cost guards *(alternative to the default Vercel; static path only — see note)* |
 | `self-learning` | Study a course / book / mindset — active recall, teach-back, spaced review |
 | `frontend-craft` | *(auto)* Framework-agnostic craft: semantic HTML, CSS, a11y, prompt framework |
 | `nextjs-patterns` | *(auto)* React/Next specifics: RSC, hydration, next/image, SWR, security |
@@ -199,6 +200,13 @@ Every mode follows the `frontend-craft` standard: a prototype skips tests and er
 > **Jest**, so treat the Vitest skill as opt-in; `automate-e2e-self-testing` builds the Playwright
 > E2E harness; and `react-performance` is where the `performance-analyzer` agent escalates for a
 > deep, profiling-first pass. All four ship **Vite-first templates** — adapt them for Next.js.
+
+> **`deploying-web-apps-aws` is an alternative deploy path, not the default.** The workspace ships
+> for **Vercel** (which handles App Router SSR/RSC natively). The AWS skill's security and cost posture
+> is strong (private S3 + CloudFront/OAC, us-east-1 ACM, OIDC CI, least-privilege IAM), but its
+> S3+CloudFront path hosts a **static** build only (`output: 'export'` / a Vite SPA) — App Router with
+> server components needs OpenNext / SST / Amplify Hosting. Use it when a project targets AWS for
+> enterprise reasons.
 
 ### Agents (4) - auto-delegate
 

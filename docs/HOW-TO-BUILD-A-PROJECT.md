@@ -181,8 +181,15 @@ Before every PR, run the pre-PR gate:
   [`react-performance`](../.claude/skills/react-performance/SKILL.md). Measure before and after; never optimize blind.
 - **Security**: no secrets in client code; if you later add a backend, auth/RBAC is enforced
   server-side, never client-only.
-- **Ship**: push to GitHub, deploy (e.g. Vercel), then watch the first 30 minutes; treat an
-  error-rate spike as an incident - triage before debugging.
+- **Ship**: push to GitHub, deploy (default: **Vercel**, which handles App Router SSR/RSC out of
+  the box), then watch the first 30 minutes; treat an error-rate spike as an incident - triage
+  before debugging.
+  - *Deploying to AWS instead (enterprise)?* Use
+    [`deploying-web-apps-aws`](../.claude/skills/deploying-web-apps-aws/SKILL.md) for the secure
+    path — private S3 + CloudFront/OAC, ACM in us-east-1, OIDC CI (no long-lived keys),
+    least-privilege IAM, and budget/teardown guards. **Caveat:** plain S3+CloudFront serves a
+    **static** export (`output: 'export'`) or a Vite SPA; an App Router app with server components
+    needs a server host (OpenNext / SST / Amplify), not raw S3.
 
 ---
 

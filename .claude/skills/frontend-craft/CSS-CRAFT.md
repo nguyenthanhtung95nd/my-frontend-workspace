@@ -31,8 +31,17 @@ syntax differs.
   generate on-brand output when you feed the token names into the prompt.
 
 ```css
-:root { --accent:#00bfa5; --bg:#121212; --space-4:1rem; --radius:.75rem; }
-.card { background:var(--bg); padding:var(--space-4); border-radius:var(--radius); }
+:root {
+  --accent: #00bfa5;
+  --bg: #121212;
+  --space-4: 1rem;
+  --radius: 0.75rem;
+}
+.card {
+  background: var(--bg);
+  padding: var(--space-4);
+  border-radius: var(--radius);
+}
 ```
 
 ## Interaction & motion
@@ -43,6 +52,9 @@ syntax differs.
   `@media (prefers-reduced-motion: no-preference) { … }` (or disable it under
   `prefers-reduced-motion: reduce`).
 - Hover effects are enhancements — the UI must work without hover (touch/keyboard).
+- Before scripting any interactive pattern (modal, accordion, tooltip, carousel,
+  scroll effect, theme toggle), check CSS-FIRST-PATTERNS.md — the platform likely
+  covers it without JS.
 
 ## Visual hygiene
 

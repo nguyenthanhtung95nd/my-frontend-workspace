@@ -1,6 +1,6 @@
 # Semantic HTML
 
-Semantic markup communicates *meaning*, not just appearance. It is the backbone of
+Semantic markup communicates _meaning_, not just appearance. It is the backbone of
 accessibility, SEO, and maintainability — and it's the same whether you write JSX, Vue
 templates, Blazor `.razor`, or plain HTML. Build the meaning first; style it later.
 
@@ -40,8 +40,15 @@ templates, Blazor `.razor`, or plain HTML. Build the meaning first; style it lat
     <legend>Your details</legend>
     <div class="field">
       <label for="email">Email <span aria-hidden="true">*</span></label>
-      <input id="email" name="email" type="email" inputmode="email" autocomplete="email"
-             required aria-describedby="email-hint email-error" />
+      <input
+        id="email"
+        name="email"
+        type="email"
+        inputmode="email"
+        autocomplete="email"
+        required
+        aria-describedby="email-hint email-error"
+      />
       <p id="email-hint" class="hint">We'll only use this to reply.</p>
       <p id="email-error" class="error" role="alert" hidden>Enter a valid email.</p>
     </div>
